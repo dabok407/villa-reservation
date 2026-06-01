@@ -27,3 +27,26 @@
 
 **부수 조치**: `build.gradle`에 `options.encoding = 'UTF-8'` 추가 — MS949 환경에서도 한글
 문자열/주석/`@DisplayName`이 깨지지 않도록 컴파일 인코딩을 고정(기존 한글 메시지 안전성도 향상).
+
+---
+
+## 슬라이스 2 — `list_reservations` · `active_today` 도구 (단위, LLM 없음)
+
+검증 대상: `ReservationToolService.listReservations(year, month)`, `activeToday(today)`
+방법: `@DataJpaTest` + 내장 H2. 실행: `./gradlew test --tests "*ReservationToolServiceTest"` → **11/11 PASS** (슬라이스1 5 + 슬라이스2 6, 회귀 없음, 2026-06-01)
+
+| # | 케이스 | 기대(도메인 규칙) | 판정 |
+|---|--------|-------------------|------|
+| 6 | 월별 조회 | 해당 월 ACTIVE만 반환, 다른 달 제외 | PASS |
+| 7 | 상태 필터 | CANCELLED·CHECKED_OUT 제외 | PASS |
+| 8 | 잘못된 월 | month 13 → IllegalArgumentException | PASS |
+| 9 | 오늘 진행중 | 체크인일·중간·**체크아웃 당일까지 진행 중**(양 끝 포함) | PASS |
+| 10 | 범위 밖 | 체크인 전날·체크아웃 다음날 → 없음 | PASS |
+| 11 | null 기준일 | IllegalArgumentException | PASS |
+
+**설계 근거**: 두 도구 모두 기존 Repository 메서드(`findByStatusAndDateRange`,
+`findByStatusAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual`)를 **재사용** — 쿼리 복제 0.
+`active_today`는 기준일(`today`)을 인자로 받아 `LocalDate.now()` 의존을 제거 → **테스트 결정성** 확보.
+
+> 주의: 충돌검증(반개구간, 체크아웃일 제외)과 active-today(양 끝 포함)는 **의도적으로 다른 경계**다.
+> "오늘 머무는 중"은 체크아웃 당일도 포함하는 게 자연스럽기 때문. 기존 시스템 동작을 그대로 따랐다.

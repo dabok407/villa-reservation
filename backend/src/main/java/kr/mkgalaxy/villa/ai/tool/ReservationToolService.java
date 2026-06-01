@@ -2,6 +2,7 @@ package kr.mkgalaxy.villa.ai.tool;
 
 import kr.mkgalaxy.villa.ai.tool.dto.AvailabilityResult;
 import kr.mkgalaxy.villa.ai.tool.dto.ConflictInfo;
+import kr.mkgalaxy.villa.ai.tool.dto.ReservationSummary;
 import kr.mkgalaxy.villa.entity.Reservation;
 import kr.mkgalaxy.villa.entity.ReservationStatus;
 import kr.mkgalaxy.villa.repository.ReservationRepository;
@@ -54,5 +55,47 @@ public class ReservationToolService {
                 .collect(Collectors.toList());
 
         return new AvailabilityResult(conflicts.isEmpty(), conflicts);
+    }
+
+    /**
+     * 특정 연/월의 ACTIVE 예약 목록을 반환한다(캘린더 조회와 동일 기준).
+     * 기존 {@link ReservationRepository#findByStatusAndDateRange}(월 구간과 겹치는 ACTIVE)을 재사용한다.
+     *
+     * @throws IllegalArgumentException month 가 1~12 범위를 벗어날 때
+     */
+    public List<ReservationSummary> listReservations(int year, int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("월은 1~12 사이여야 합니다");
+        }
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1);
+        return reservationRepository
+                .findByStatusAndDateRange(ReservationStatus.ACTIVE, startDate, endDate)
+                .stream()
+                .map(this::toSummary)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 기준일(today) 현재 진행 중인 ACTIVE 예약을 반환한다(체크인일 ≤ today ≤ 체크아웃일, 양 끝 포함).
+     * 기존 Repository 메서드를 재사용한다. today 를 인자로 받아 테스트 결정성을 보장한다.
+     *
+     * @throws IllegalArgumentException today 가 null 일 때
+     */
+    public List<ReservationSummary> activeToday(LocalDate today) {
+        if (today == null) {
+            throw new IllegalArgumentException("기준 날짜는 필수입니다");
+        }
+        return reservationRepository
+                .findByStatusAndCheckInDateLessThanEqualAndCheckOutDateGreaterThanEqual(
+                        ReservationStatus.ACTIVE, today, today)
+                .stream()
+                .map(this::toSummary)
+                .collect(Collectors.toList());
+    }
+
+    private ReservationSummary toSummary(Reservation r) {
+        return new ReservationSummary(r.getReserverName(), r.getCheckInDate(), r.getCheckOutDate(),
+                r.getAdultCount(), r.getChildCount());
     }
 }
