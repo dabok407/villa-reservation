@@ -1,0 +1,38 @@
+# ===== 보안 / 개인정보 (절대 커밋 금지) =====
+# 가족 실예약 데이터 + 비밀번호 해시가 든 H2 파일 DB → PII 보호로 제외
+# (앱은 첫 실행 시 ddl-auto=update 로 빈 DB를 자동 생성)
+backend/data/
+*.mv.db
+*.trace.db
+# 시크릿 / 환경변수
+.env
+*.env
+!*.env.example
+
+# ===== 면접/지원 전략 메모 (내부용, 포트폴리오 제외) =====
+_nhn_context/
+
+# ===== 빌드 산출물 =====
+backend/build/
+backend/.gradle/
+backend/out/
+# 프론트 빌드물(필요 시 buildAll 로 재생성)
+frontend/dist/
+frontend/node_modules/
+node_modules/
+
+# ===== Claude Code 하네스: 공유 자산은 커밋, 개인 설정만 제외 =====
+# (CLAUDE.md, .claude/agents, skills, hooks, settings.json 은 커밋 — 하네스 증거)
+.claude/settings.local.json
+.claude/launch.json
+.claude/worktrees/
+.claude/*.lock
+.claude/scheduled_tasks.lock
+
+# ===== OS / editor =====
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.log

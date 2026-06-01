@@ -1,0 +1,52 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.18'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
+}
+
+group = 'kr.mkgalaxy'
+version = '0.0.1'
+sourceCompatibility = '1.8'
+
+// 한글 문자열/주석이 MS949 환경에서도 깨지지 않도록 UTF-8 강제
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.security:spring-security-crypto'
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Frontend build integration
+task buildFrontend(type: Exec) {
+    workingDir '../frontend'
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'npm', 'run', 'build'
+    } else {
+        commandLine 'npm', 'run', 'build'
+    }
+}
+
+task copyFrontend(type: Copy, dependsOn: buildFrontend) {
+    from '../frontend/dist'
+    into 'src/main/resources/static'
+}
+
+// Only integrate frontend build when explicitly requested
+tasks.register('buildAll') {
+    dependsOn copyFrontend, 'build'
+    tasks.findByName('build').mustRunAfter copyFrontend
+}
