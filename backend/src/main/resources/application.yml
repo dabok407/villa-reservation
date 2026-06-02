@@ -25,7 +25,9 @@ server:
 # 자연어 어시스턴트(Claude) 연계 — 키는 환경변수로 주입(코드/yml 평문 금지)
 anthropic:
   api-key: ${ANTHROPIC_API_KEY:}
-  model: claude-opus-4-8
+  # 기본은 비용 효율적인 Sonnet. 데모 품질을 더 높이려면 opus 계열로 교체(설정값).
+  # 실제 API 모델 ID는 console.anthropic.com 의 Models 에서 확인해 맞출 것.
+  model: ${ANTHROPIC_MODEL:claude-sonnet-4-6}
   base-url: https://api.anthropic.com
   version: "2023-06-01"
   max-tokens: 1024

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class AnthropicProperties {
 
     private String apiKey = "";
-    private String model = "claude-opus-4-8";
+    private String model = "claude-sonnet-4-6";
     private String baseUrl = "https://api.anthropic.com";
     private String version = "2023-06-01";
     private int maxTokens = 1024;

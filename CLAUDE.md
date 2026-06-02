@@ -77,7 +77,7 @@ cd backend
 - 흐름: user 자연어 → Claude(messages+tools) → `stop_reason=tool_use` → 백엔드가 읽기전용 tool 실행 → tool_result append → 재호출 → `end_turn` 응답. 루프 횟수 상한으로 비용·무한루프 차단.
 - 읽기 전용 tool 3개: `check_availability`(countConflictingNew), `list_reservations`(getReservationsByMonth), `active_today`.
 - system 프롬프트에 박을 것: 오늘 날짜, 가구 매핑, 충돌 규약, 모호성 처리 규칙, 환각 차단. 긴 프롬프트는 prompt caching.
-- 모델 기본 **claude-opus-4-8**(설정값). **멀티턴은 서버 무상태** — 클라이언트가 messages 배열로 대화 이력 전달(세션/DB 저장 없음). 챗 UI(React/Tailwind)는 백엔드 MVP 후행.
+- 모델 기본 **claude-sonnet-4-6**(설정값 `ANTHROPIC_MODEL`, 비용 효율; 데모 품질 위해 opus로 교체 가능). **멀티턴은 서버 무상태** — 클라이언트가 messages 배열로 대화 이력 전달(세션/DB 저장 없음). 챗 UI(React/Tailwind)는 백엔드 MVP 후행.
 
 ## 운영 환경 (EC2)
 - **운영 URL: https://mkgalaxy.kr/villa** (Nginx 리버스 프록시 → localhost:8082, context `/villa`). AI 공개 엔드포인트 = `https://mkgalaxy.kr/villa/api/ai/chat`. 앱은 8082로만 바인딩, HTTPS/외부노출은 Nginx 담당.
