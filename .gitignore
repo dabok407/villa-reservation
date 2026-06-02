@@ -9,6 +9,13 @@ backend/data/
 *.env
 !*.env.example
 
+# 시크릿이 든 환경별 프로필 설정(실제 API 키는 이 파일들에만 둔다 — 절대 커밋 금지)
+# 기본 application.yml 은 ${ANTHROPIC_API_KEY:} 로 비워 커밋함
+**/application-local.yml
+**/application-dev.yml
+**/application-prod.yml
+**/application-secret*.yml
+
 # ===== 면접/지원 전략 메모 (내부용, 포트폴리오 제외) =====
 _nhn_context/
 
